@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>护照签证地图</title>
+    <link rel="stylesheet" href="./styles/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="top-bar">
+        <div class="top-bar-inner">
+          <div class="title-block">
+            <p class="brand">护照签证地图</p>
+            <h1 id="mapTitle">护照签证地图</h1>
+            <p id="mapSubtitle" class="subtitle">正在读取本地数据</p>
+            <p id="hoverInfo" class="hover-info">当前悬停：暂无</p>
+          </div>
+
+          <div class="picker-wrap">
+            <label for="passportSelect" class="picker-label">选择护照</label>
+            <div class="control-row">
+              <div class="view-switch">
+                <button class="view-button is-active" type="button" data-view="2d">2D 地图</button>
+                <button class="view-button" type="button" data-view="3d">3D 地球</button>
+              </div>
+              <div class="picker-row">
+                <select id="passportSelect" class="passport-select"></select>
+                <button id="clearFilterButton" class="clear-filter-button" type="button">查看全部</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="map-stage">
+        <div id="worldMap" class="map-surface is-visible"></div>
+        <div id="globeView" class="map-surface globe-surface"></div>
+      </main>
+
+      <section class="bottom-dock">
+        <div class="stats-strip">
+          <button class="stat-pill" type="button" data-status-filter="visa-free">
+            <strong id="visaFreeCount">0</strong>
+            <span>免签</span>
+          </button>
+          <button class="stat-pill" type="button" data-status-filter="visa-on-arrival">
+            <strong id="visaOnArrivalCount">0</strong>
+            <span>落地签</span>
+          </button>
+          <button class="stat-pill" type="button" data-status-filter="e-visa">
+            <strong id="eVisaCount">0</strong>
+            <span>电子签</span>
+          </button>
+          <button class="stat-pill" type="button" data-status-filter="visa-required">
+            <strong id="visaRequiredCount">0</strong>
+            <span>需签证</span>
+          </button>
+        </div>
+
+        <div class="legend-strip">
+          <ul id="legendList" class="legend-list"></ul>
+        </div>
+      </section>
+    </div>
+
+    <script src="./vendor/echarts.min.js"></script>
+    <script src="./vendor/globe.gl.min.js"></script>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>
