@@ -1,0 +1,44 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>每日磨损记录</h2>
+        <p>这里直接读取 Excel 里的磨损表，网页显示和表里看到的是同一份数据。</p>
+    </div>
+    <div class="stat-card">
+        <span>当前表格</span>
+        <strong>{{ wear_sheet.row_count }} 行 / {{ wear_sheet.column_count }} 列</strong>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="section-title">
+        <h3>Excel 直接预览</h3>
+        <p>你手动改 Excel 后，这里刷新就会跟着变。</p>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    {% for header in wear_sheet.headers %}
+                    <th>{{ header or '' }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in wear_sheet.rows %}
+                <tr>
+                    {% for value in row %}
+                    <td>{{ '' if value is none else value }}</td>
+                    {% endfor %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{{ wear_sheet.column_count or 1 }}" class="empty-cell">磨损表里还没有数据</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

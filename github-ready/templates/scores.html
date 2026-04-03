@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>每日积分录入</h2>
+        <p>每次保存都会在 Excel 右侧新增一列，旧分数保留，总积分按最近 15 列自动重排。</p>
+    </div>
+    <div class="stat-card">
+        <span>最新积分列：{{ score_summary.latest_column }}</span>
+        <strong>当前按最近 {{ score_summary.window_size }} 列排序</strong>
+    </div>
+</section>
+
+<section class="panel compact-panel">
+    <form method="post" action="{{ url_for('save_scores') }}">
+        <div class="toolbar compact-toolbar">
+            <label>
+                记录日期
+                <input type="date" name="date" value="{{ selected_date }}">
+            </label>
+            <div class="quick-actions">
+                <span>批量操作</span>
+                <button type="button" class="secondary-btn" data-fill-all="{{ quick_scores[0] }}">全部填{{ quick_scores[0] }}</button>
+                <button type="button" class="secondary-btn" data-clear-all="true">全部清空</button>
+            </div>
+            <button type="submit" class="primary-btn">同步到 Excel</button>
+        </div>
+
+        <div class="table-wrap compact-wrap">
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>积分</th>
+                        <th>快捷填分</th>
+                        <th>交易前</th>
+                        <th>交易后</th>
+                        <th>手动磨损</th>
+                        <th>每日磨损</th>
+                        <th>收入</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in active_members %}
+                    <tr>
+                        <td class="name-cell"><a class="member-link" href="{{ url_for('profit_calendar', name=member.name) }}">{{ member.name }}</a></td>
+                        <td><input type="number" name="score_{{ member.name }}" class="score-input compact-input"></td>
+                        <td>
+                            <div class="quick-score-group compact">
+                                {% for score in quick_scores %}
+                                <button type="button" class="score-chip compact-chip" data-target="score_{{ member.name }}" data-score="{{ score }}">{{ score }}</button>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td><input type="number" step="any" name="before_{{ member.name }}" class="balance-input compact-input" data-balance-group="{{ member.name }}" data-balance-role="before" placeholder="前余额"></td>
+                        <td><input type="number" step="any" name="after_{{ member.name }}" class="balance-input compact-input" data-balance-group="{{ member.name }}" data-balance-role="after" placeholder="后余额"></td>
+                        <td><input type="number" step="any" name="manual_wear_{{ member.name }}" class="manual-wear-input compact-input" data-manual-wear="{{ member.name }}" placeholder="直接填"></td>
+                        <td><span class="wear-result compact-result" data-wear-result="{{ member.name }}">无记录</span></td>
+                        <td><input type="number" step="any" name="income_{{ member.name }}" class="income-input compact-input" placeholder="默认0"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="section-title">
+        <h3>当前排名</h3>
+        <p>按 Excel 里的总积分实时展示全部成员。</p>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>姓名</th>
+                    <th>总积分</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in score_summary.rankings %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a class="member-link" href="{{ url_for('profit_calendar', name=item.name) }}">{{ item.name }}</a></td>
+                    <td>{{ item.total }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="empty-cell">还没有积分记录</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

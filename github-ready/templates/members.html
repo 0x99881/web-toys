@@ -1,0 +1,82 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <h2>成员管理</h2>
+        <p>当前启用 {{ enabled_count }} 人，停用成员不会出现在每日录入页，但历史记录会保留。</p>
+    </div>
+    <div class="stat-card">
+        <span>共 {{ members|length }} 人</span>
+        <strong>启用 {{ enabled_count }} 人</strong>
+    </div>
+</section>
+
+<section class="panel compact-panel">
+    <div class="section-title">
+        <h3>新增成员</h3>
+        <p>新增后默认启用。</p>
+    </div>
+    <form method="post" action="{{ url_for('add_member') }}" class="member-add-form compact-toolbar">
+        <label>
+            姓名
+            <input type="text" name="name" class="compact-input" placeholder="请输入成员姓名">
+        </label>
+        <label class="wide-field">
+            备注
+            <input type="text" name="note" class="compact-input" placeholder="可选备注">
+        </label>
+        <div class="form-actions">
+            <button type="submit" class="primary-btn">新增成员</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel compact-panel">
+    <div class="section-title">
+        <h3>成员列表</h3>
+        <p>名字可直接进入个人详情页查看磨损日历。</p>
+    </div>
+    <div class="table-wrap compact-wrap members-wrap">
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>状态</th>
+                    <th>备注</th>
+                    <th>创建时间</th>
+                    <th>停用时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td class="name-cell"><a class="member-link" href="{{ url_for('member_detail', name=member.name) }}">{{ member.name }}</a></td>
+                    <td>
+                        <span class="status-tag {% if member.status == '启用' %}enabled{% else %}disabled{% endif %}">{{ member.status }}</span>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('update_member') }}" class="member-row-form compact-row-form">
+                            <input type="hidden" name="name" value="{{ member.name }}">
+                            <input type="text" name="note" class="compact-input" value="{{ member.note }}" placeholder="备注">
+                            <input type="hidden" name="status" value="{{ member.status }}">
+                            <button type="submit" class="secondary-btn small-btn">保存</button>
+                        </form>
+                    </td>
+                    <td>{{ member.created_at }}</td>
+                    <td>{{ member.disabled_at or '-' }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('update_member') }}">
+                            <input type="hidden" name="name" value="{{ member.name }}">
+                            <input type="hidden" name="note" value="{{ member.note }}">
+                            <input type="hidden" name="status" value="{% if member.status == '启用' %}停用{% else %}启用{% endif %}">
+                            <button type="submit" class="{% if member.status == '启用' %}danger-btn{% else %}primary-btn{% endif %} small-btn">{% if member.status == '启用' %}停用{% else %}恢复{% endif %}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

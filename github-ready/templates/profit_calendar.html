@@ -1,0 +1,116 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<section class="calendar-toolbar">
+    <form method="get" action="{{ url_for('profit_calendar') }}" class="member-picker-panel">
+        <label>
+            成员
+            <select name="name" class="member-select" onchange="this.form.submit()">
+                <option value="all" {% if selected_name == 'all' %}selected{% endif %}>全部成员</option>
+                {% for member in members %}
+                <option value="{{ member.name }}" {% if member.name == selected_name %}selected{% endif %}>{{ member.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <input type="hidden" name="year" value="{{ calendar_data.year }}">
+        <input type="hidden" name="month" value="{{ calendar_data.month }}">
+    </form>
+
+    <div class="calendar-stats">
+        <div class="profit-stat-card">
+            <span>本月总收入</span>
+            <strong>{{ calendar_data.month_income_total }}</strong>
+        </div>
+        <div class="profit-stat-card wear-card">
+            <span>本月总磨损</span>
+            <strong>{{ calendar_data.month_wear_total }}</strong>
+        </div>
+        {% if calendar_data.is_all_members %}
+        <div class="profit-stat-card average-card">
+            <span>{{ calendar_data.month_income_account_count }}个号均收</span>
+            <strong>{{ calendar_data.month_avg_income }}</strong>
+        </div>
+        <div class="profit-stat-card average-card wear-average-card">
+            <span>{{ calendar_data.month_wear_account_count }}个号均磨</span>
+            <strong>{{ calendar_data.month_avg_wear }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="profit-panel">
+    <div class="profit-header">
+        <a class="month-arrow" href="{{ url_for('profit_calendar', name=selected_name, year=calendar_data.prev_year, month=calendar_data.prev_month) }}">&larr;</a>
+        <strong>{{ calendar_data.year }}?{{ "%02d"|format(calendar_data.month) }}?</strong>
+        <a class="month-arrow" href="{{ url_for('profit_calendar', name=selected_name, year=calendar_data.next_year, month=calendar_data.next_month) }}">&rarr;</a>
+    </div>
+
+    <div class="profit-weekdays">
+        <div>日</div>
+        <div>一</div>
+        <div>二</div>
+        <div>三</div>
+        <div>四</div>
+        <div>五</div>
+        <div>六</div>
+    </div>
+
+    {% for week in calendar_data.weeks %}
+    <div class="profit-calendar-grid">
+        {% for cell in week %}
+        <button
+            type="button"
+            class="profit-day {% if not cell.in_month %}other-month{% endif %} {% if cell.date == calendar_data.today %}today{% endif %} {% if cell.wear is not none or cell.income is not none %}has-data{% endif %}"
+            data-calendar-open="true"
+            data-date="{{ cell.date }}"
+            data-wear="{% if cell.wear is not none %}{{ cell.wear }}{% endif %}"
+            data-income="{% if cell.income is not none %}{{ cell.income }}{% endif %}"
+            data-note="{{ cell.note or '暂无备注' }}"
+            data-wear-count="{{ cell.wear_account_count or 0 }}"
+            data-income-count="{{ cell.income_account_count or 0 }}"
+            data-avg-wear="{% if cell.avg_wear is not none %}{{ cell.avg_wear }}{% endif %}"
+            data-avg-income="{% if cell.avg_income is not none %}{{ cell.avg_income }}{% endif %}"
+            data-breakdown='{{ cell.breakdown | tojson }}'
+            style="--profit-intensity: {{ cell.intensity }}"
+        >
+            <span class="profit-day-number">{{ cell.day }}</span>
+            {% if cell.wear is not none or cell.income is not none %}
+            <span class="profit-day-wear">磨损 {{ cell.wear or 0 }}</span>
+            <span class="profit-day-income">收入 {{ cell.income or 0 }}</span>
+            {% if calendar_data.is_all_members and (cell.wear_account_count or cell.income_account_count) %}
+            <span class="profit-day-average">{{ cell.wear_account_count or 0 }}个号均磨 {{ cell.avg_wear }}</span>
+            <span class="profit-day-average">{{ cell.income_account_count or 0 }}个号均收 {{ cell.avg_income }}</span>
+            <span class="profit-day-hint">双击展开各号明细</span>
+            {% endif %}
+            {% else %}
+            <span class="profit-day-empty">无记录</span>
+            {% endif %}
+        </button>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</section>
+
+<div class="calendar-modal" data-calendar-modal hidden>
+    <div class="calendar-modal-backdrop" data-calendar-close="true"></div>
+    <div class="calendar-modal-card">
+        <div class="calendar-modal-head">
+            <h3>当天详情</h3>
+            <button type="button" class="modal-close" data-calendar-close="true">关闭</button>
+        </div>
+        <div class="calendar-modal-body">
+            <p><strong>日期</strong><span data-calendar-detail-date>请选择一天</span></p>
+            <p><strong>每日磨损</strong><span data-calendar-detail-wear>-</span></p>
+            <p><strong>每日收入</strong><span data-calendar-detail-income>-</span></p>
+            <p><strong>备注</strong><span data-calendar-detail-note>暂无备注</span></p>
+            <p><strong>磨损参与号数</strong><span data-calendar-detail-wear-count>-</span></p>
+            <p><strong>收入参与号数</strong><span data-calendar-detail-income-count>-</span></p>
+            <p><strong>平均单号磨损</strong><span data-calendar-detail-avg-wear>-</span></p>
+            <p><strong>平均单号收入</strong><span data-calendar-detail-avg-income>-</span></p>
+        </div>
+        <div class="calendar-breakdown" data-calendar-breakdown hidden>
+            <h4>各号明细</h4>
+            <div class="calendar-breakdown-list" data-calendar-breakdown-list></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or "BM2 管理系统" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>BM2 管理系统</h1>
+                <p>本地单用户工具</p>
+            </div>
+            <nav class="nav">
+                <a href="{{ url_for('score_entry') }}" class="{% if request.endpoint == 'score_entry' %}active{% endif %}">每日积分录入</a>
+                <a href="{{ url_for('wear_entry') }}" class="{% if request.endpoint == 'wear_entry' %}active{% endif %}">每日磨损记录</a>
+                <a href="{{ url_for('profit_calendar') }}" class="{% if request.endpoint in ['profit_calendar', 'member_detail'] %}active{% endif %}">成员收益日历</a>
+                <a href="{{ url_for('members') }}" class="{% if request.endpoint == 'members' %}active{% endif %}">成员管理</a>
+            </nav>
+            <div class="theme-switch-card">
+                <span>页面模式</span>
+                <button type="button" class="theme-toggle" data-theme-toggle="true">切换夜间模式</button>
+            </div>
+            <div class="meta-card">
+                <span>当前 Excel</span>
+                <strong>{{ excel_filename }}</strong>
+            </div>
+        </aside>
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-stack">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='app.js', v=asset_version) }}"></script>
+</body>
+</html>
